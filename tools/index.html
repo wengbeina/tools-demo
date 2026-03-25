@@ -1,0 +1,114 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小工具</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #a8edea, #fed6e3);
+    }
+    .tool-card {
+      transition: transform 0.3s ease-in-out;
+    }
+    .tool-card:hover {
+      transform: translateY(-5px);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+  <div id="app">
+    <header class="bg-white shadow-md py-4 px-6 flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-indigo-600">AICoding 小工具箱</h1>
+      <nav>
+        <ul class="flex space-x-4">
+          <li><a href="#" class="text-gray-600 hover:text-indigo-500">首页</a></li>
+          <li><a href="#" class="text-gray-600 hover:text-indigo-500">关于</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main class="flex-grow container mx-auto px-4 py-8">
+      <section class="text-center mb-12">
+        <h2 class="text-3xl font-semibold mb-4">高效、便捷的开发辅助工具</h2>
+        <p class="text-gray-600 max-w-2xl mx-auto">提供多种实用小工具，帮助开发者提升效率，专注核心逻辑编写。</p>
+      </section>
+
+      <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- 工具卡片 1 -->
+        <div class="tool-card bg-white rounded-lg shadow-md p-6 flex flex-col items-center text-center">
+          <i class="fas fa-code text-4xl text-indigo-500 mb-4"></i>
+          <h3 class="text-xl font-semibold mb-2">代码格式化</h3>
+          <p class="text-gray-600 mb-4">自动美化您的代码结构，提高可读性</p>
+          <button @click="openTool('code-formatter')" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 transition">立即使用</button>
+        </div>
+
+        <!-- 工具卡片 2 -->
+        <div class="tool-card bg-white rounded-lg shadow-md p-6 flex flex-col items-center text-center">
+          <i class="fas fa-terminal text-4xl text-green-500 mb-4"></i>
+          <h3 class="text-xl font-semibold mb-2">命令生成器</h3>
+          <p class="text-gray-600 mb-4">快速生成常用开发命令，节省时间</p>
+          <button @click="openTool('command-generator')" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">立即使用</button>
+        </div>
+
+        <!-- 工具卡片 3 -->
+        <div class="tool-card bg-white rounded-lg shadow-md p-6 flex flex-col items-center text-center">
+          <i class="fas fa-database text-4xl text-yellow-500 mb-4"></i>
+          <h3 class="text-xl font-semibold mb-2">SQL 查询构建</h3>
+          <p class="text-gray-600 mb-4">可视化构建 SQL 查询语句</p>
+          <button @click="openTool('sql-builder')" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition">立即使用</button>
+        </div>
+      </section>
+
+      <!-- 工具展示区 -->
+      <section v-if="currentTool" id="tool-display" class="mt-12 bg-white rounded-lg shadow-lg p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-2xl font-bold">{{ toolTitle }}</h2>
+          <button @click="closeTool" class="text-gray-500 hover:text-gray-700">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div id="tool-content" class="mt-4">
+          <!-- 代码格式化工具 -->
+          <div v-if="currentTool === 'code-formatter'">
+            <textarea v-model="codeInput" class="w-full h-40 p-4 border rounded mb-4" placeholder="请输入需要格式化的代码..."></textarea>
+            <button @click="formatCode" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600">格式化</button>
+            <pre v-if="formattedCode" class="mt-4 p-4 bg-gray-100 rounded">{{ formattedCode }}</pre>
+          </div>
+
+          <!-- 命令生成器 -->
+          <div v-if="currentTool === 'command-generator'">
+            <label class="block mb-2">选择命令类型:</label>
+            <select v-model="commandType" class="w-full p-2 border rounded mb-4">
+              <option value="git">Git 命令</option>
+              <option value="docker">Docker 命令</option>
+              <option value="npm">NPM 命令</option>
+            </select>
+            <button @click="generateCommand" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">生成命令</button>
+            <div v-if="generatedCommand" class="mt-4 p-4 bg-gray-100 rounded whitespace-pre">{{ generatedCommand }}</div>
+          </div>
+
+          <!-- SQL 查询构建器 -->
+          <div v-if="currentTool === 'sql-builder'">
+            <input v-model="tableName" type="text" class="w-full p-2 border rounded mb-4" placeholder="输入表名">
+            <textarea v-model="columns" class="w-full h-20 p-2 border rounded mb-4" placeholder="输入列名（逗号分隔）"></textarea>
+            <button @click="buildSQL" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">构建查询</button>
+            <pre v-if="sqlQuery" class="mt-4 p-4 bg-gray-100 rounded">{{ sqlQuery }}</pre>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="bg-white py-6 text-center text-gray-600 border-t">
+      &copy; 2026 Tools. All rights reserved.
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
